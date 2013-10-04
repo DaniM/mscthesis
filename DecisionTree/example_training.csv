@@ -1,0 +1,6 @@
+health,is_in_cover,ammo,action
+healthy,exposed,empty,run
+healthy,in_cover,with_ammo,attack
+hurt,in_cover,with_ammo,attack
+healthy,in_cover,empty,defend
+hurt,in_cover,empty,defend
