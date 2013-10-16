@@ -1,5 +1,6 @@
 extensions [matrix]
 patches-own [influence]
+turtles-own[agent-path path-index]
 
 globals[HEIGHT WIDTH buffer _filter currentTicks]
 
@@ -13,6 +14,10 @@ to setup
   set buffer matrix:make-constant HEIGHT WIDTH 0
   set _filter matrix:from-row-list  [[1 2 1][2 4 2][1 2 1]]
   set currentTicks 0
+  create-turtles 1 [
+    setxy min-pxcor min-pycor 
+    ;;setxy max-pxcor - 2 max-pycor 
+    set heading 45]
 end
 
 to go
@@ -20,18 +25,30 @@ to go
   [
     ask patches [ apply-convolution ]
     ask patches [ update-from-buffer]
+    ;; astar search
+    ask turtles 
+    [
+      set agent-path astar patch-here (patch max-pxcor max-pycor)
+      set path-index 0
+      ;;print agent-path
+    ]
   ]
   tick
 end
 
+to navigate-path
+end
+
 to-report astar[patch1 patch2]
-  let path (list)
+  let path []
   let closed matrix:make-constant HEIGHT WIDTH 0
   let costs matrix:make-constant HEIGHT WIDTH -1
   let H matrix:make-constant HEIGHT WIDTH 0
   let from matrix:make-constant HEIGHT WIDTH -1
-  
-  let open (lput patch1 (list))
+  ;;print patch1
+  ;;print patch2
+  let open (lput patch1 [])
+  ;;print open
   ;; set the cost of the initial node
   matrix:set costs (([pycor] of patch1) * (-1) + max-pycor) (([pxcor] of patch1) + max-pxcor) 0
   ;; set H
@@ -43,7 +60,11 @@ to-report astar[patch1 patch2]
   let path-found False
   while [not (empty? open or path-found)]
   [
-    set node (remove-item 0 open)
+    set node (item 0 open)
+    ;;print (word "Current Node: " node)
+    ;;print "Open list"
+    ;;print open
+    set open (remove-item 0 open)
     let nodei ([pycor] of node) * (-1) + max-pycor
     let nodej ([pxcor] of node) + max-pxcor
     ;; set as closed
@@ -58,10 +79,10 @@ to-report astar[patch1 patch2]
       let n ([neighbors] of node)
       let sort? False
       ;;for each neighbour
-      foreach n
+      ask n
       [
-        let i ([pycor] of ?) * (-1) + max-pycor
-        let j ([pxcor] of ?) + max-pxcor
+        let i pycor * (-1) + max-pycor
+        let j pxcor + max-pxcor
 
         
         let isClosed (matrix:get closed i j) = 1
@@ -69,7 +90,7 @@ to-report astar[patch1 patch2]
         let parentG (matrix:get costs nodei nodej)
         let parentID astar-patch-hash node
         ;; get the cost
-        let g (parentG + cost node ?)
+        let g (parentG + cost node self)
         
         ifelse not (isClosed or isOpen)
         [
@@ -77,11 +98,11 @@ to-report astar[patch1 patch2]
           ;; set the cost
           matrix:set costs i j g
           ;; estimate the distance to goal
-          matrix:set H i j (estimate ? patch2)
+          matrix:set H i j (estimate self patch2)
           ;; set the parent
           matrix:set from i j parentID
           ;; add to the open list
-          set open lput ? open
+          set open lput self open
           set sort? True
         ]
         [
@@ -103,7 +124,7 @@ to-report astar[patch1 patch2]
               ;; set the new parent
               matrix:set from i j parentID
               ;; add to the open list
-              set open lput ? open
+              set open lput self open
               set sort? True
             ]
           ]
@@ -117,6 +138,23 @@ to-report astar[patch1 patch2]
     ]
   ]
   ;;construct the path
+  set node patch2
+  let nodei ([pycor] of node) * (-1) + max-pycor
+  let nodej ([pxcor] of node) + max-pxcor
+  let parentID matrix:get from nodei nodej
+  let id astar-patch-hash node
+  set path fput node path
+  while [id != parentID]
+  [
+    set node get-patch parentID
+    set nodei ([pycor] of node) * (-1) + max-pycor
+    set nodej ([pxcor] of node) + max-pxcor
+    set id parentID
+    set parentID matrix:get from nodei nodej
+    set path fput node path
+  ]
+  print "path"
+  print path
   report path
 end
 
@@ -142,7 +180,7 @@ end
 to-report cost[p1 p2] ;; return the cost of moving from p1 to p2
   let x ([pxcor] of p2) - ([pxcor] of p1)
   let y ([pycor] of p2) - ([pycor] of p1)  
-  report sqrt (x * x + y * y)
+  report sqrt (x * x + y * y) + ([influence] of p1) * 20 ;; add the influence of the current patch (20 is the red max value)
 end
 
 to-report astar-patch-hash[p] ;; trasform patch's pxcor and pycor into an ID
@@ -152,9 +190,14 @@ to-report astar-patch-hash[p] ;; trasform patch's pxcor and pycor into an ID
 end
 
 to-report get-patch[id] ;; get the patch from the id
-  let i floor id / WIDTH
+  let i floor (id / WIDTH)
   let j id mod WIDTH
-  report patch i j
+  ;;print (word id "Matrix position [" i "," j "]")
+  set i (i * -1) + max-pycor
+  set j j - max-pxcor
+  ;;print (word "Patch position [" j "," i "]")
+  ;;print patch j i
+  report patch j i
 end
 
 to apply-convolution
@@ -534,9 +577,9 @@ NIL
 BUTTON
 69
 138
-138
+139
 171
-Reset
+Setup
 setup
 NIL
 1
@@ -589,7 +632,7 @@ Min-Influence
 Min-Influence
 0
 1
-0.05
+0.1
 0.05
 1
 NIL
