@@ -14,13 +14,22 @@ to setup
   set buffer matrix:make-constant HEIGHT WIDTH 0
   set _filter matrix:from-row-list  [[1 2 1][2 4 2][1 2 1]]
   set currentTicks 0
-  create-turtles 1 [
-    setxy min-pxcor min-pycor 
-    ;;setxy max-pxcor - 2 max-pycor 
-    set heading 45]
+  ;create-turtles 1 [
+  ;  setxy min-pxcor min-pycor 
+  ;  set heading 45]
 end
 
 to go
+  
+  if ticks mod Turtle-Creation-Frequency = 0
+  [
+    ;; add a new turtle
+    create-turtles 1 [
+    setxy min-pxcor min-pycor 
+    ;;setxy max-pxcor - 2 max-pycor 
+    set heading 45]
+  ]
+  
   if ticks mod Update-Frequency = 0
   [
     ask patches [ apply-convolution ]
@@ -30,13 +39,27 @@ to go
     [
       set agent-path astar patch-here (patch max-pxcor max-pycor)
       set path-index 0
-      ;;print agent-path
     ]
   ]
+  ask turtles [ navigate-path ]
   tick
 end
 
 to navigate-path
+  ;;print "navigating"
+  if agent-path != nobody
+  [
+    if patch-here = (item path-index agent-path)
+    [
+      set path-index path-index + 1
+      if (length agent-path) = path-index
+      [
+        die
+      ]
+    ]
+    face (item path-index agent-path)
+    fd 1
+  ]
 end
 
 to-report astar[patch1 patch2]
@@ -153,8 +176,8 @@ to-report astar[patch1 patch2]
     set parentID matrix:get from nodei nodej
     set path fput node path
   ]
-  print "path"
-  print path
+  ;;print "path"
+  ;;print path
   report path
 end
 
@@ -670,6 +693,21 @@ NIL
 NIL
 1
 
+SLIDER
+742
+297
+969
+330
+Turtle-Creation-Frequency
+Turtle-Creation-Frequency
+0
+300
+30
+1
+1
+NIL
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -688,6 +726,8 @@ Use the Min-Influence slider to set a threshold which set the influence to 0 if 
 Use the Momentum slider as a blending parameter between the new influence and the previous one.
 
 Use the Update-Frequency slider to set the number of ticks between influence update and repathing.
+
+Use the Turtle-Creation-Frequency to set the frequency which the turtles are created
 
 ## THINGS TO NOTICE
 
