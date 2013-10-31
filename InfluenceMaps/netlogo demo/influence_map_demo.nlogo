@@ -27,7 +27,8 @@ to go
     create-turtles 1 [
     setxy min-pxcor min-pycor 
     ;;setxy max-pxcor - 2 max-pycor 
-    set heading 45]
+    set heading 45
+    set agent-path Nobody]
   ]
   
   if ticks mod Update-Frequency = 0
@@ -702,7 +703,7 @@ Turtle-Creation-Frequency
 Turtle-Creation-Frequency
 0
 300
-30
+20
 1
 1
 NIL
