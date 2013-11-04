@@ -25,10 +25,22 @@ theta2 = np.loadtxt(open("testfiles/Theta2.txt","rb"),delimiter=",")
 X = np.loadtxt(open("testfiles/ann_test_data.txt","rb"),delimiter=",")
 y = np.loadtxt(open("testfiles/ann_test_output.txt","rb"),delimiter=",")
 
+m = X.shape[0]
+# Add ones to the X data matrix
+X = np.hstack( (np.ones((m, 1)), X) )
+#Convert Y from a integer [0,9] to a vector[10]
+#Because the test is taken from matlab and the indexes values are 1 based
+#I'll make a little trick (move all values to the index value - 1 ) 
+Y = np.zeros((m, num_labels));
+for i in xrange(m):
+    Y[i,((y[i]-1)%num_labels)] = 1;
+y = Y;
+
+
 nn_params = np.concatenate((theta1.flatten(),theta2.flatten()),axis=2)
 
 print 'Testing cost function'
 
+J = ANN.costFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, X, y)
 
-
-ANN.costFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, X, y)
+print 'this value should be about 0.287629', J
