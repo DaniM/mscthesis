@@ -103,6 +103,8 @@ J,grad = ANN.costFunction(nn_params, input_layer_size, hidden_layer_size, num_la
 
 print 'this value should be about 0.287629', J
 
+print 'Gradient: ',grad[0:5]
+
 print 'Testing gradient'
 
 testGradient()

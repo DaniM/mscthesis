@@ -19,7 +19,7 @@ X = np.hstack((np.ones((m,1)), X))
 theta = np.array([1,0.5,0.5,0.5],).reshape((4,1))
 alpha = 0.1
 
-# do a step by step like AI wisdom
+# do a step by step (incremental) like AI wisdom
 actual = np.dot(X[0].reshape((1,n+1)),theta)
 print 'Actual: ', actual
 print 'Intended: ',y[0]
@@ -64,7 +64,7 @@ print 'Theta: ',theta
 
 # batch
 theta = np.array([1,0.5,0.5,0.5],).reshape((4,1))
-history,theta = gradientDescent(theta, X, y, alpha, 1e-10, 1)
+history,theta = gradientDescent(theta, X, y, alpha, 1e-10, 5)
 
 print 'Theta: ',theta
 print 'History: ',history

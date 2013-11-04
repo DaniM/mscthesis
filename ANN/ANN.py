@@ -16,8 +16,7 @@ def costFunction(nnParams,inputLayerSize,hiddenLayerSize,numLabels,X,y):
     binary vector of 1's and 0's to be used with the neural network
     cost function.
   
-    The returned parameter grad should be a "unrolled" vector of the
-    partial derivatives of the neural network.
+    The gradient is an "unrolled" vector of the partial derivatives of the neural network.
     '''
     m = X.shape[0]
     #Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
