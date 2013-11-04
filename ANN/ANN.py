@@ -1,28 +1,37 @@
 '''
-Created on 30/10/2013
+Created on 04/11/2013
 
 @author: Dani
 '''
 import numpy as np
 
+def costFunction(nnParams,inputLayerSize,hiddenLayerSize,numLabels,X,y):
+    '''
+    computes the cost and gradient of the neural network. The
+    parameters for the neural network are "unrolled" into the vector
+    nnParams and need to be converted back into the weight matrices. 
+  
+    The returned parameter grad should be a "unrolled" vector of the
+    partial derivatives of the neural network.
+    '''
+    m = X.shape[0]
+    #Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
+    #for our 2 layer neural network
+    Theta1 = nnParams[0:hiddenLayerSize * (inputLayerSize + 1)].reshape( 
+                (hiddenLayerSize, (inputLayerSize + 1)) )
+
+    Theta2 = nnParams[(1 + (hiddenLayerSize * (inputLayerSize + 1))):].reshape(
+                 (numLabels, (hiddenLayerSize + 1)) )
+    
+    # cost and grad 
+    J = 0;
+    Theta1_grad = np.zeros(Theta1.shape)
+    Theta2_grad = np.zeros(Theta2.shape);
+
 def sigmoid(x):
     y = np.exp(-x)
     return 1/(1 + y)
 
-def costFunction(theta,X,y):
-    J=0 # costFunction
-    grad = np.zeros(theta.shape) # gradient
-    m,n = X.shape
-    # Implementation notes: we could have used * here and there but to make sure lets just use dot
-    h = sigmoid( np.dot( X, theta ) ) # hypothesis
-    
-    #do some checking to avoid NaN
-    
-    aux = np.dot(-y.T,np.log(h)) - np.dot((1-y).T,np.log(1-h))
-    # sum it just to have a single number and not a 1x1 matrix
-    J = (1./m) * np.sum(aux)
-    grad = (1./m) * np.dot(X.T,(h - y))
-    return J,grad
-
-if __name__ == '__main__':
-    pass
+def sigmoidGrad(x):
+    sig = sigmoid(x)
+    return np.multiply(sig,(1-sig))
