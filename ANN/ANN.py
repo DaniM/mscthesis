@@ -55,7 +55,7 @@ def costFunction(nnParams,inputLayerSize,hiddenLayerSize,numLabels,X,y):
     delta2 = delta2[:,1:] # Do not get the column of ones we have just pushed
     Theta2_grad = (1./m) * (Theta2_grad + np.dot(delta3.T,a2));
     Theta1_grad = (1./m) * (Theta1_grad + np.dot(delta2.T,a1));
-    grad = np.concatenate((Theta1_grad.flatten(),Theta2_grad.flatten()),axis=2);
+    grad = np.concatenate((Theta1_grad.flatten(order='F'),Theta2_grad.flatten(order='F')),axis=2);
     
     return J,grad
 
@@ -66,14 +66,3 @@ def sigmoid(x):
 def sigmoidGrad(x):
     sig = sigmoid(x)
     return np.multiply(sig,(1-sig))
-
-def debugInitializeWeights(inConnections,outConnections):
-    '''
-    Initialize the weights of a layer with fan_in 
-    incoming connections and fan_out outgoing connections using a fixed 
-    strategy. Debug purposes
-    '''
-    # add the bias term
-    W = np.zeros((outConnections,inConnections + 1))
-    
-    return W
